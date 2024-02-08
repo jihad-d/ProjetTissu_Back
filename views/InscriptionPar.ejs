@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <%- include("Nav") %>
+
+    <h1>Inscription</h1>
+
+    <form action="/api/inscription" method="post">
+        <label for="">Nom</label>
+        <input type="text" name="nom">
+        <br>
+        <label for="">Prénom</label>
+        <input type="text" name="prenom">
+        <br>
+        <label for="">Date de naissance</label>
+        <input type="date" name="date">
+        <br>
+        <label for="">Email*</label>
+        <input type="email" name="email" required>
+        <br>
+        <label for="">Mot de passe*</label>
+        <input type="password" name="password" required>
+        <br>
+        <br>
+        <input type="submit" value="Inscription">
+    </form>
+</body>
+</html>
