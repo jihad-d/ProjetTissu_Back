@@ -153,7 +153,7 @@ app.get('/deconnexion', (req, res) => {
 
 //MODIFIER COMPTE
 
-app.put("/modifier/:id", function (req, res) {
+app.put("/profil/:id", function (req, res) {  
     const Data = {
         nom : req.body.nom,
         prenom : req.body.prenom,
@@ -165,7 +165,7 @@ app.put("/modifier/:id", function (req, res) {
     UtilisateurPro.updateOne({_id : req.params.id},{$set: Data})
     .then(()=>{
         console.log("Account updated");
-        res.redirect("/modifier/"+req.params.id);
+        res.redirect("/Profil/"+req.params.id);
     })
     .catch(err=>{console.log(err);});
 });
@@ -178,10 +178,10 @@ app.get("/profil/:id", function (req,res){
 })
 });
  
-app.get('/modify/:id', function(req, res){
+app.get('/profil/:id', function(req, res){
     UtilisateurPro.findOne({_id : req.params.id})
     .then((data)=>{
-        res.render("Modifier", {data : data})
+        res.render("Profil", {data : data})
     })
     .catch(err =>{console.log(err);})
 })

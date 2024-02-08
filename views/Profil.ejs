@@ -32,6 +32,24 @@
         </p>
     </form>
 
+    <form action="/modifier/<%= data._id %>?_method=PUT" method="post">
+        <input type="hidden" name="_method" value="PUT">
+        <label for="">Nom</label><br>
+        <input type="text" name="nom" value="<%= data.nom %>"><br>
+        <label for="">Prenom</label><br>
+        <input type="text" name="prenom" value="<%= data.prenom %>"><br>
+        <label for="">Email</label><br>
+        <input type="text" name="email" value="<%= data.email %>"><br>
+        <label for="">Téléphone</label><br>
+        <input type="number" name="tel" value="<%= data.tel %>" maxlength="10"><br>
+        <label for="">SIRET</label><br>
+        <input type="number" name="siret" value="<%= data.siret %>" maxlength="14"><br>
+        <label for="">Mot de passe</label><br>
+        <input type="password" name="password"><br>
+        <br>
+        <input type="submit" value="Modifier">
+    </form>
+
     <a href="/deconnexion/<%=data._id%>"></a><input type="submit" value="Déconnexion"></a><br>
     <a href="/supprimer/<%=data._id%>?_method=DELETE"></a><input type="submit" value="Supression du compte"></a><br>
 
