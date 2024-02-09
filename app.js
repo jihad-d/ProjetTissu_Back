@@ -25,7 +25,8 @@ app.set('view engine', 'ejs');
 
 //Mettre a disposition les données et les rendres accessible pour le front
 const cors = require('cors');
-
+//De base
+// app.use(cors());
 //Transmettre TOUT type de données meme sensible (JWT)
 app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 
@@ -141,7 +142,6 @@ app.post("/connexion", function (req, res){
 });
 
 
-
 //DECONNEXION 
 
 app.get('/deconnexion', (req, res) => {
@@ -176,8 +176,15 @@ app.put("/recupdataform/:id", function (req, res) {
     .catch(err=>{console.log(err);});
 });
 
-
-app.get('/recupdataform/:id', function(req, res){
+app.get("/profil/:id", function (req,res){
+    UtilisateurPro.findOne({_id : req.params.id})
+    .then((data)=>{
+        res.render("Profil",{data : data})
+    .catch(err =>{console.log(err);})
+})
+});
+ 
+app.get('/profil/:id', function(req, res){
     UtilisateurPro.findOne({_id : req.params.id})
     .then((data)=>{
         res.render("Profil", {data : data})
