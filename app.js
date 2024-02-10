@@ -93,9 +93,9 @@ app.get("/inscriptionpro", function (req,res){
     res.render("InscriptionPro");
 })
 
-// app.get("/recupdataform", function (req,res){
-//     res.render("recupdataform");
-// })
+app.get("/recupdataform", function (req,res){
+    res.render("recupdataform");
+})
 
 app.get("/connexion", function (req,res){
     res.render("Connexion");
@@ -184,13 +184,6 @@ app.get("/profil/:id", function (req,res){
 })
 });
  
-app.get('/profil/:id', function(req, res){
-    UtilisateurPro.findOne({_id : req.params.id})
-    .then((data)=>{
-        res.render("Profil", {data : data})
-    })
-    .catch(err =>{console.log(err);})
-})
 
 //SUPPRIMER COMPTE
 
