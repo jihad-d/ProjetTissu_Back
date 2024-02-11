@@ -131,15 +131,26 @@ app.post("/connexion", function (req, res){
         //JWT à ce niveau la, mettre tout en public puis sécuriser à la fin
 
         // req.session.user = utilisateurPro;
-        res.render("accueil", {data : utilisateurPro})
+        // res.render("accueil", {data : utilisateurPro})
         console.log("Connected");
         // res.json('LOGGED IN')
-        res.redirect("http://localhost:3000/accueil");
+        res.redirect("http://localhost:3000/recupdataform");
     })
     .catch(err =>{
         console.log(err);
+        res.status(500).send("Erreur");
     })
 });
+
+app.get("/recupdataform/:id", function (req,res){
+    UtilisateurPro.findOne({
+        _id : req.params.id
+    })
+    .then((data)=>{
+        res.json(data);
+    })
+    .catch(err => console.log(err));
+})
 
 
 //DECONNEXION 
@@ -154,6 +165,7 @@ app.get('/deconnexion', (req, res) => {
       }
     });
 });
+
 
 //MODIFIER COMPTE
 
