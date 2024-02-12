@@ -245,6 +245,25 @@ app.get('/affichertissu', function(req, res){
     })
 });
 
+// MODIFIER TISSU
+app.put('/modiftissu:id', function(req, res){
+    const Data = {
+        titre : req.body.titre,
+        couleur : req.body.couleur,
+        description : req.body.description,
+    }
+
+    Tissu.updateOne({
+        _id : req.params.id
+    }, {$set:Data})
+    .then(()=>{
+        res.redirect('http://localhost:3000/affichertissu/')
+    })  
+    .catch((err)=>{
+        console.log(err);
+    }); 
+});
+
 
 var server = app.listen(5000, function() {
     console.log("Server listening on port 5000");
