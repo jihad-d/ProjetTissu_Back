@@ -231,7 +231,7 @@ app.post('/newproduit',function(req, res){
         .then(() =>{
             console.log("Fabric saved");
             res.status(201).json({"result" : "Fabric saved"})
-            res.redirect('http://localhost:3000/tissu/')
+            res.redirect('http://localhost:3000/affichertissu/')
         })
         .catch(err =>console.error(err));
 
