@@ -134,7 +134,7 @@ app.post("/connexion", function (req, res){
         // res.render("accueil", {data : utilisateurPro})
         console.log("Connected");
         // res.json('LOGGED IN')
-        res.redirect("http://localhost:3000/recupdataform");
+        res.redirect("http://localhost:3000/profil");
     })
     .catch(err =>{
         console.log(err);
@@ -209,6 +209,41 @@ app.delete("/supprimer/:id", function (req,res){
     .catch((err)=>{console.log(err);})
 });
 
+
+
+//TISSU
+
+var Tissu = require('./models/Tissu');
+//formulaire nouveau produit
+app.get('/newproduit', function(req, res){
+    res.render('NewProduit')
+});
+
+//ajout du produit (tissu)
+app.post('/newproduit',function(req, res){
+    const Data = new Tissu({
+        titre : req.body.titre,
+        couleur : req.body.couleur,
+        // imageName : req.file.filename,
+        description : req.body.description,
+    })
+        Data.save()
+        .then(() =>{
+            console.log("Fabric saved");
+            res.status(201).json({"result" : "Fabric saved"})
+            res.redirect('http://localhost:3000/tissu/')
+        })
+        .catch(err =>console.error(err));
+
+});
+
+//recupération des tissu
+app.get('/affichertissu', function(req, res){
+    Tissu.find()
+    .then((data)=>{
+        res.json(data);
+    })
+});
 
 
 var server = app.listen(5000, function() {

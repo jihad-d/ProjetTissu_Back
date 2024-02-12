@@ -9,4 +9,4 @@ const utilisateurParSchema = mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("Info", utilisateurParSchema);
+module.exports = mongoose.model("UserPar", utilisateurParSchema);
