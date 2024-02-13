@@ -48,19 +48,19 @@ app.use(cookieParser());
 //Import jwt decode
 const {jwtDecode} = require('jwt-decode');
 
-//Multer 
+//Multer : téléchargement d'image/fichier
 const multer = require('multer')
 app.use(express.static('uploads'));
 
-// const storage = multer.diskStorage({
-//     destination : (req, file, cb) =>{
-//         cb(null, 'uploads/')
-//     },
-//     filename : (req, file, cb) =>{
-//         cb(null, file.originalname);
-//     }
-// })
-// const upload = multer({storage})
+const storage = multer.diskStorage({
+    destination : (req, file, cb) =>{
+        cb(null, 'uploads/')
+    },
+    filename : (req, file, cb) =>{
+        cb(null, file.originalname);
+    }
+})
+const upload = multer({storage})
 
 
 
@@ -227,6 +227,13 @@ app.post('/newproduit',function(req, res){
         // imageName : req.file.filename,
         description : req.body.description,
     })
+    console.log(req.file);
+
+    // Image obligatoire pour l'enregistrement d'un blog
+    if(!req.file){
+        res.status(400).json("No File Uploaded")
+    }
+    else{
         Data.save()
         .then(() =>{
             console.log("Fabric saved");
@@ -234,6 +241,7 @@ app.post('/newproduit',function(req, res){
             res.redirect('http://localhost:3000/affichertissu/')
         })
         .catch(err =>console.error(err));
+    }
 
 });
 
@@ -245,14 +253,14 @@ app.get('/affichertissu', function(req, res){
     })
 });
 
+
 // MODIFIER TISSU
-app.put('/modiftissu:id', function(req, res){
+app.put('/modiftissu/:id', function(req, res){
     const Data = {
         titre : req.body.titre,
         couleur : req.body.couleur,
         description : req.body.description,
     }
-
     Tissu.updateOne({
         _id : req.params.id
     }, {$set:Data})
@@ -262,6 +270,17 @@ app.put('/modiftissu:id', function(req, res){
     .catch((err)=>{
         console.log(err);
     }); 
+});
+
+
+//SUPPRIMER TISSU 
+app.delete('/supprimtissu/:id', function(req, res) {
+    Tissu.findOneAndDelete({_id:req.params.id})
+    .then(()=>{
+        console.log("Fabric deleted");
+        res.redirect('http://localhost:3000/affichertissu/');
+    })
+    .catch((err)=>{console.log(err);})
 });
 
 
