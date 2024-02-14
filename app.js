@@ -62,6 +62,9 @@ const storage = multer.diskStorage({
 })
 const upload = multer({storage})
 
+app.get("/", function (req,res){
+    res.render("Hero");
+})
 
 
 //INSCRIPTION PRO
@@ -220,7 +223,8 @@ app.get('/newproduit', function(req, res){
 });
 
 //ajout du produit (tissu)
-app.post('/newproduit',function(req, res){
+app.post('/newproduit',function(req, res){ 
+    // avec les données reçues dans la requête on crée un nouveau produit/tissu
     const Data = new Tissu({
         titre : req.body.titre,
         couleur : req.body.couleur,
@@ -230,18 +234,19 @@ app.post('/newproduit',function(req, res){
     console.log(req.file);
 
     // Image obligatoire pour l'enregistrement d'un blog
-    if(!req.file){
-        res.status(400).json("No File Uploaded")
-    }
-    else{
+    // if(!req.file){
+    //     res.status(400).json("No File Uploaded")
+    //     //si erreur d'ajout d'image
+    // }
+    // else{
         Data.save()
         .then(() =>{
             console.log("Fabric saved");
             res.status(201).json({"result" : "Fabric saved"})
-            res.redirect('http://localhost:3000/affichertissu/')
+            res.redirect('http://localhost:3000/affichertissu')
         })
         .catch(err =>console.error(err));
-    }
+    // }
 
 });
 
