@@ -137,7 +137,7 @@ app.post("/connexion", function (req, res){
         // res.render("accueil", {data : utilisateurPro})
         console.log("Connected");
         // res.json('LOGGED IN')
-        res.redirect("http://localhost:3000/profil");
+        res.redirect(`/recupdataform/${utilisateurPro._id}`);
     })
     .catch(err =>{
         console.log(err);
@@ -145,29 +145,18 @@ app.post("/connexion", function (req, res){
     })
 });
 
+// app.get("/affichertissu", function (req,res){
+//     res.render("AfficherTissu");
+// }) 
+
 app.get("/recupdataform/:id", function (req,res){
-    UtilisateurPro.findOne({
-        _id : req.params.id
-    })
+    UtilisateurPro.findOne({ _id : req.params.id})
     .then((data)=>{
-        res.json(data);
+        res.render("RecupDataForm",{data : data});
     })
     .catch(err => console.log(err));
 })
 
-
-//DECONNEXION 
-
-app.get('/deconnexion', (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log("Deconnected")
-        res.redirect('/connexion');
-      }
-    });
-});
 
 
 //MODIFIER COMPTE
@@ -186,19 +175,32 @@ app.put("/recupdataform/:id", function (req, res) {
     UtilisateurPro.updateOne({_id : req.params.id},{$set: Data})
     .then(()=>{
         console.log("Account updated");
-        res.redirect("/Profil/"+req.params.id);
+        res.redirect(`/RecupDataForm/${req.params.id}`);
     })
     .catch(err=>{console.log(err);});
 });
 
-app.get("/profil/:id", function (req,res){
-    UtilisateurPro.findOne({_id : req.params.id})
-    .then((data)=>{
-        res.render("Profil",{data : data})
-    .catch(err =>{console.log(err);})
-})
-});
+// app.get("/profil/:id", function (req,res){
+//     UtilisateurPro.findOne({_id : req.params.id})
+//     .then((data)=>{
+//         res.render("Profil",{data : data})
+//     .catch(err =>{console.log(err);})
+// })
+// });
  
+//DECONNEXION 
+
+app.get('/deconnexion', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Deconnected")
+        res.redirect('/connexion');
+      }
+    });
+});
+
 
 //SUPPRIMER COMPTE
 
