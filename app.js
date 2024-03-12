@@ -54,7 +54,7 @@ app.use(express.static('uploads'));
 
 const storage = multer.diskStorage({
     destination : (req, file, cb) =>{
-        cb(null, 'uploads/')
+        cb(null, 'images/')
     },
     filename : (req, file, cb) =>{
         cb(null, file.originalname);
@@ -225,30 +225,33 @@ app.get('/newproduit', function(req, res){
 });
 
 //ajout du produit (tissu)
-app.post('/newproduit',function(req, res){ 
+app.post('/newproduit', upload.single('image'),function(req, res){ 
     // avec les données reçues dans la requête on crée un nouveau produit/tissu
     const Data = new Tissu({
         titre : req.body.titre,
+        image : req.file.filename,
         couleur : req.body.couleur,
-        // imageName : req.file.filename,
         description : req.body.description,
     })
     console.log(req.file);
 
-    // Image obligatoire pour l'enregistrement d'un blog
-    // if(!req.file){
-    //     res.status(400).json("No File Uploaded")
-    //     //si erreur d'ajout d'image
-    // }
-    // else{
+    // Image obligatoire pour l'enregistrement d'une img
+    if(!req.file){
+        res.status(400).json("No File Uploaded")
+        //si erreur d'ajout d'image
+    }
+    else{
         Data.save()
         .then(() =>{
             console.log("Fabric saved");
-            res.status(201).json({"result" : "Fabric saved"})
+            // res.status(201).json({"result" : "Fabric saved"})
             res.redirect('http://localhost:3000/affichertissu')
         })
-        .catch(err =>console.error(err));
-    // }
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ error: 'Une erreur est survenue lors de l\'enregistrement du produit.' });
+          });
+    }
 
 });
 
@@ -266,6 +269,7 @@ app.put('/modiftissu/:id', function(req, res){
     const Data = {
         titre : req.body.titre,
         couleur : req.body.couleur,
+        imageName : req.file.filename,
         description : req.body.description,
     }
     Tissu.updateOne({
