@@ -2,6 +2,7 @@
 
 var express = require('express');
 var app = express();
+
 //Middleware pour recuperer la donnée
 var bodyParser = require('body-parser');
 
@@ -10,7 +11,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 //fichier de configuration
 require('dotenv').config();
 
-// var path = require('path');
+var path = require('path');
 
 //Connexion mongodb :
 var mongoose = require('mongoose'); 
@@ -54,7 +55,7 @@ app.use(express.static('uploads'));
 
 const storage = multer.diskStorage({
     destination : (req, file, cb) =>{
-        cb(null, 'images/')
+        cb(null, 'uploads/')
     },
     filename : (req, file, cb) =>{
         cb(null, file.originalname);
@@ -86,7 +87,7 @@ app.post("/api/inscriptionpro", function (req, res){
     Data.save()
     .then(()=>{
         console.log("User saved");
-        res.redirect("/accueil")
+        res.redirect("/affichertissu")
 
     })
     .catch(err=>{console.log(err);})
@@ -94,27 +95,6 @@ app.post("/api/inscriptionpro", function (req, res){
 
 app.get("/inscriptionpro", function (req,res){
     res.render("InscriptionPro");
-})
-
-app.get("/recupdataform", function (req,res){
-    res.render("recupdataform");
-})
-
-app.get("/connexion", function (req,res){
-    res.render("Connexion");
-})
-
-app.get("/accueil", function (req,res){
-    res.render("Accueil");
-})
-
-
-// RECUPERATION UTILISATEUR PRO
-app.get("/utilisateurPro", function(req, res){
-    UtilisateurPro.find()
-    .then((data)=>{
-        res.json(data);
-    })
 })
 
 
@@ -132,31 +112,37 @@ app.post("/connexion", function (req, res){
             return res.status(404).send("Invalid password")
         }
         //JWT à ce niveau la, mettre tout en public puis sécuriser à la fin
-
-        // req.session.user = utilisateurPro;
-        // res.render("accueil", {data : utilisateurPro})
         console.log("Connected");
-        // res.json('LOGGED IN')
-        res.redirect(`/recupdataform/${utilisateurPro._id}`);
+        // res.redirect(`/affichertissu/${utilisateurPro._id}`);
+        res.json({ user: utilisateurPro });
     })
     .catch(err =>{
         console.log(err);
         res.status(500).send("Erreur");
     })
-});
-
-// app.get("/affichertissu", function (req,res){
-//     res.render("AfficherTissu");
-// }) 
-
-app.get("/recupdataform/:id", function (req,res){
-    UtilisateurPro.findOne({ _id : req.params.id})
-    .then((data)=>{
-        res.render("RecupDataForm",{data : data});
-    })
-    .catch(err => console.log(err));
 })
 
+
+// RECUPERATION UTILISATEUR PRO
+app.get("/utilisateur/:id", function(req, res){
+    UtilisateurPro.find({ _id : req.params.id })
+    .then((data)=>{
+        res.json(data);
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(500).json({ error: 'ERROR' });
+    });
+});
+
+
+app.get("/recupdataform", function (req,res){
+    res.redirect('http://localhost:3000/recupdataform/');
+})
+
+app.get("/connexion", function (req,res){
+    res.render("Connexion");
+})
 
 
 //MODIFIER COMPTE
@@ -175,19 +161,12 @@ app.put("/recupdataform/:id", function (req, res) {
     UtilisateurPro.updateOne({_id : req.params.id},{$set: Data})
     .then(()=>{
         console.log("Account updated");
-        res.redirect(`/RecupDataForm/${req.params.id}`);
+        res.redirect(`/recupdataform/${req.params.id}`); // avant c'était profil
     })
     .catch(err=>{console.log(err);});
 });
 
-// app.get("/profil/:id", function (req,res){
-//     UtilisateurPro.findOne({_id : req.params.id})
-//     .then((data)=>{
-//         res.render("Profil",{data : data})
-//     .catch(err =>{console.log(err);})
-// })
-// });
- 
+
 //DECONNEXION 
 
 app.get('/deconnexion', (req, res) => {
@@ -201,15 +180,151 @@ app.get('/deconnexion', (req, res) => {
     });
 });
 
-
-//SUPPRIMER COMPTE
-
 app.delete("/supprimer/:id", function (req,res){
     UtilisateurPro.findOneAndDelete({_id:req.params.id})
     .then(()=>{
         console.log("Account deleted");
         req.session.user = UtilisateurPro;
-        res.redirect("/accueil");
+        res.redirect("/");
+    })
+    .catch((err)=>{console.log(err);})
+});
+
+
+// INSCRIPTION PAR
+
+var UtilisateurPar = require("./models/UtilisateurPar")
+
+app.post("/api/inscriptionpar", function (req, res){
+    const Data = new UtilisateurPar({
+        nom : req.body.nom,
+        prenom : req.body.prenom,
+        dateDeNaissance : req.body.dateDeNaissance,
+        tel : req.body.tel,
+        email : req.body.email,
+        password : bcrypt.hashSync(req.body.password, 10),
+    })
+    Data.save()
+    .then(()=>{
+        console.log("User particulier saved");
+        res.redirect("/")
+
+    })
+    .catch(err=>{console.log(err);})
+})
+
+app.get("/inscriptionpar", function (req,res){
+    res.render("InscriptionPar");
+})
+
+app.get("/affichertissu", function (req,res){
+    res.render("AfficherTissu");
+})
+
+app.get("/connexion", function (req,res){
+    res.render("Connexion");
+})
+
+
+// RECUPERATION UTILISATEUR PAR
+app.get("/utilisateurPar", function(req, res){
+    UtilisateurPar.find()
+    .then((data)=>{
+        res.json(data);
+    })
+})
+
+
+//CONNEXION 
+
+app.post("/connexion", function (req, res){
+    UtilisateurPar.findOne({
+        email : req.body.email
+    }).then(utilisateurPar =>{
+        if(!utilisateurPar)
+        {
+            return res.status(404).send("No user found");
+        }
+        if (!bcrypt.compareSync(req.body.password, utilisateurPar.password)){
+            return res.status(404).send("Invalid password")
+        }
+        //JWT à ce niveau la, mettre tout en public puis sécuriser à la fin
+
+        // req.session.user = utilisateurPro;
+        console.log("Connected");
+        // res.json('LOGGED IN')
+        res.redirect(`/recupdataform/${utilisateurPar._id}`);
+    })
+    .catch(err =>{
+        console.log(err);
+        res.status(500).send("Erreur");
+    })
+});
+
+app.get("/recupdataform", function (req, res){
+    res.render('recupdataform'); 
+});
+
+
+//MODIFIER COMPTE
+
+app.put("//:id", function (req, res) {  
+    const Data = {
+        nom : req.body.nom,
+        prenom : req.body.prenom,
+        dateDeNaissance : req.body.dateDeNaissance,
+        tel : req.body.tel,
+        email : req.body.email,
+        password : bcrypt.hashSync(req.body.password, 10),
+    }
+    UtilisateurPar.updateOne({_id : req.params.id},{$set: Data})
+    .then(()=>{
+        console.log("Account updated");
+        res.redirect("//"+req.params.id); // avant c'était profil
+    })
+    .catch(err=>{console.log(err);});
+});
+
+// app.get("/recupdataform/:id", function (req,res){
+//     UtilisateurPar.findOne({_id : req.params.id})
+//     .then((data)=>{
+//         res.render("RecupDataForm",{data : data})
+//     .catch(err =>{console.log(err);})
+// })
+// });
+
+app.get("/recupdataform/:id", function (req,res){
+    UtilisateurPar.findOne({
+        _id : req.params.id
+    })
+    .then((data)=>{
+        res.render("AfficherTissu", {data: data});
+    })
+    .catch(err => console.log(err));
+})
+
+
+//DECONNEXION 
+
+app.get('/deconnexion', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Deconnected")
+        res.redirect('/connexion');
+      }
+    });
+});
+
+//SUPPRIMER COMPTE
+
+app.delete("/supprimer/:id", function (req,res){
+    UtilisateurPar.findOneAndDelete({_id:req.params.id})
+    .then(()=>{
+        console.log("Account deleted");
+        req.session.user = UtilisateurPar;
+        res.redirect("/");
     })
     .catch((err)=>{console.log(err);})
 });
@@ -228,14 +343,15 @@ app.get('/newproduit', function(req, res){
 app.post('/newproduit', upload.single('image'),function(req, res){ 
     // avec les données reçues dans la requête on crée un nouveau produit/tissu
     const Data = new Tissu({
+        image : req.body.image,
         titre : req.body.titre,
-        image : req.file.filename,
         couleur : req.body.couleur,
         description : req.body.description,
+        prix : req.body.prix,
     })
     console.log(req.file);
 
-    // Image obligatoire pour l'enregistrement d'une img
+    // Image obligatoire pour l'enregistrement d'un blog
     if(!req.file){
         res.status(400).json("No File Uploaded")
         //si erreur d'ajout d'image
@@ -247,10 +363,7 @@ app.post('/newproduit', upload.single('image'),function(req, res){
             // res.status(201).json({"result" : "Fabric saved"})
             res.redirect('http://localhost:3000/affichertissu')
         })
-        .catch(err => {
-            console.error(err);
-            res.status(500).json({ error: 'Une erreur est survenue lors de l\'enregistrement du produit.' });
-          });
+        .catch(err =>console.error(err));
     }
 
 });
@@ -267,10 +380,11 @@ app.get('/affichertissu', function(req, res){
 // MODIFIER TISSU
 app.put('/modiftissu/:id', function(req, res){
     const Data = {
+        image : image,
         titre : req.body.titre,
         couleur : req.body.couleur,
-        imageName : req.file.filename,
         description : req.body.description,
+        prix : req.body.prix,
     }
     Tissu.updateOne({
         _id : req.params.id
@@ -298,3 +412,5 @@ app.delete('/supprimtissu/:id', function(req, res) {
 var server = app.listen(5000, function() {
     console.log("Server listening on port 5000");
 });
+
+module.exports = app
