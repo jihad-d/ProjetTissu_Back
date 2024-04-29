@@ -97,7 +97,6 @@ app.get("/inscriptionpro", function (req,res){
     res.render("InscriptionPro");
 })
 
-
 //CONNEXION 
 
 app.post("/connexion", function (req, res){
@@ -113,8 +112,9 @@ app.post("/connexion", function (req, res){
         }
         //JWT à ce niveau la, mettre tout en public puis sécuriser à la fin
         console.log("Connected");
-        // res.redirect(`/affichertissu/${utilisateurPro._id}`);
-        res.json({ user: utilisateurPro });
+        // res.redirect(`/recupdataform/${utilisateurPro._id}`);
+        res.redirect(`http://localhost:3000/recupdataform/${utilisateurPro._id}`)
+        // res.json({ user: utilisateurPro });
     })
     .catch(err =>{
         console.log(err);
@@ -217,13 +217,13 @@ app.get("/inscriptionpar", function (req,res){
     res.render("InscriptionPar");
 })
 
-app.get("/affichertissu", function (req,res){
-    res.render("AfficherTissu");
-})
+// app.get("/affichertissu", function (req,res){
+//     res.render("AfficherTissu");
+// })
 
-app.get("/connexion", function (req,res){
-    res.render("Connexion");
-})
+// app.get("/connexion", function (req,res){
+//     res.render("Connexion");
+// })
 
 
 // RECUPERATION UTILISATEUR PAR
@@ -285,23 +285,23 @@ app.put("//:id", function (req, res) {
     .catch(err=>{console.log(err);});
 });
 
-// app.get("/recupdataform/:id", function (req,res){
-//     UtilisateurPar.findOne({_id : req.params.id})
-//     .then((data)=>{
-//         res.render("RecupDataForm",{data : data})
-//     .catch(err =>{console.log(err);})
-// })
-// });
-
 app.get("/recupdataform/:id", function (req,res){
-    UtilisateurPar.findOne({
-        _id : req.params.id
-    })
+    UtilisateurPar.findOne({_id : req.params.id})
     .then((data)=>{
-        res.render("AfficherTissu", {data: data});
-    })
-    .catch(err => console.log(err));
+        res.redirect("RecupDataForm",{data : data})
+    .catch(err =>{console.log(err);})
 })
+});
+
+// app.get("/recupdataform/:id", function (req,res){
+//     UtilisateurPar.findOne({
+//         _id : req.params.id
+//     })
+//     .then((data)=>{
+//         res.render("AfficherTissu", {data: data});
+//     })
+//     .catch(err => console.log(err));
+// })
 
 
 //DECONNEXION 
