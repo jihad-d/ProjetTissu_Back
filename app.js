@@ -140,6 +140,14 @@ app.get("/recupdataform", function (req,res){
     res.redirect('http://localhost:3000/recupdataform/');
 })
 
+app.get("/recupdataform/:id", function (req,res){
+    UtilisateurPro.findOne({_id : req.params.id})
+    .then((data)=>{
+        res.json(data)
+    })
+    .catch(err=>{console.log(err);});
+});
+
 app.get("/connexion", function (req,res){
     res.render("Connexion");
 })
@@ -161,10 +169,31 @@ app.put("/recupdataform/:id", function (req, res) {
     UtilisateurPro.updateOne({_id : req.params.id},{$set: Data})
     .then(()=>{
         console.log("Account updated");
-        res.redirect(`/recupdataform/${req.params.id}`); // avant c'était profil
+        res.redirect(`http://localhost:3000/recupdataform/${req.params.id}`); // avant c'était profil
     })
     .catch(err=>{console.log(err);});
 });
+
+// //MODIF 2 PRO 
+
+// app.put("/modifpro/:id", function (req, res) {  
+//     const Data = {
+//         nom : req.body.nom,
+//         prenom : req.body.prenom,
+//         email : req.body.email,
+//         tel : req.body.tel,
+//         siret : req.body.siret,
+//         adresse : req.body.adresse,
+//         url : req.body.url,
+//         password : bcrypt.hashSync(req.body.password, 10)
+//     }
+//     UtilisateurPro.updateOne({_id : req.params.id},{$set: Data})
+//     .then(()=>{
+//         console.log("Account updated");
+//         res.redirect(`http://localhost:3000/modifpro/${req.params.id}`); // avant c'était profil
+//     })
+//     .catch(err=>{console.log(err);});
+// });
 
 
 //DECONNEXION 
@@ -180,15 +209,18 @@ app.get('/deconnexion', (req, res) => {
     });
 });
 
+//SUPPRESSION COMPTE PRO
+
 app.delete("/supprimer/:id", function (req,res){
     UtilisateurPro.findOneAndDelete({_id:req.params.id})
     .then(()=>{
         console.log("Account deleted");
-        req.session.user = UtilisateurPro;
-        res.redirect("/");
+        // req.session.user = UtilisateurPro;
+        res.redirect('http://localhost:3000/');
     })
     .catch((err)=>{console.log(err);})
 });
+
 
 
 // INSCRIPTION PAR
@@ -285,13 +317,14 @@ app.put("//:id", function (req, res) {
     .catch(err=>{console.log(err);});
 });
 
-app.get("/recupdataform/:id", function (req,res){
-    UtilisateurPar.findOne({_id : req.params.id})
-    .then((data)=>{
-        res.redirect("RecupDataForm",{data : data})
-    .catch(err =>{console.log(err);})
-})
-});
+// app.get("/recupdataform/:id", function (req,res){
+//     UtilisateurPar.findOne({_id : req.params.id})
+//     .then((data)=>{
+//         res.json(data)
+//         // res.redirect("RecupDataForm",{data : data})
+//     .catch(err =>{console.log(err);})
+// })
+// });
 
 // app.get("/recupdataform/:id", function (req,res){
 //     UtilisateurPar.findOne({
