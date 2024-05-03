@@ -87,8 +87,7 @@ app.post("/api/inscriptionpro", function (req, res){
     Data.save()
     .then(()=>{
         console.log("User saved");
-        res.redirect("/affichertissu")
-
+        res.redirect(`http://localhost:3000/affichertissu/`)
     })
     .catch(err=>{console.log(err);})
 })
@@ -96,6 +95,7 @@ app.post("/api/inscriptionpro", function (req, res){
 app.get("/inscriptionpro", function (req,res){
     res.render("InscriptionPro");
 })
+
 
 //CONNEXION 
 
