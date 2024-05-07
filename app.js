@@ -126,6 +126,9 @@ app.get("/", function (req, res) {
     res.render("/");
 })
 
+
+
+
 //INSCRIPTION PRO
 
 var UtilisateurPro = require("./models/UtilisateurPro")
@@ -145,7 +148,7 @@ app.post("/api/inscriptionpro", function (req, res) {
     Data.save()
         .then(() => {
             console.log("User saved");
-            res.redirect(`http://localhost:3000/affichertissu/`)
+            res.redirect(`http://localhost:3000/connexion/`)
         })
         .catch(err => { console.log(err); })
 })
@@ -173,7 +176,7 @@ app.post("/connexion", function (req, res) {
             maxAge: 1000 * 60 * 60 * 24 * 5, // 5 jours en ms
             httpOnly: true
         } )
-        console.log("Connected");
+        console.log("PRO Connected");
         res.redirect(`http://localhost:3000/recupdataform/${utilisateurPro._id}`)
         // res.json({ user: utilisateurPro });
     })
@@ -209,9 +212,6 @@ app.get("/recupdataform/:id", function (req, res) {
         .catch(err => { console.log(err); });
 });
 
-app.get("/connexion", function (req, res) {
-    res.render("Connexion");
-})
 
 
 //MODIFIER COMPTE
@@ -235,45 +235,10 @@ app.put("/recupdataform/:id", function (req, res) {
         .catch(err => { console.log(err); });
 });
 
-// //MODIF 2 PRO 
-
-// app.put("/modifpro/:id", function (req, res) {  
-//     const Data = {
-//         nom : req.body.nom,
-//         prenom : req.body.prenom,
-//         email : req.body.email,
-//         tel : req.body.tel,
-//         siret : req.body.siret,
-//         adresse : req.body.adresse,
-//         url : req.body.url,
-//         password : bcrypt.hashSync(req.body.password, 10)
-//     }
-//     UtilisateurPro.updateOne({_id : req.params.id},{$set: Data})
-//     .then(()=>{
-//         console.log("Account updated");
-//         res.redirect(`http://localhost:3000/modifpro/${req.params.id}`); // avant c'était profil
-//     })
-//     .catch(err=>{console.log(err);});
-// });
-
-
-//DECONNEXION 
-
-// app.get('/deconnexion', (req, res) => {
-//     req.session.destroy((err) => {
-//         if (err) {
-//             console.log(err);
-//         } else {
-//             console.log("Deconnected")
-//             res.redirect('/connexion');
-//         }
-//     });
-// });
 
 app.get('/deconnexion', (req, res) =>{
     res.clearCookie("access-token");
     res.redirect('http://localhost:3000/connexion/');
-    // res.redirect('/connexion');
     console.log("Déconnecté");
 })
 
@@ -297,6 +262,9 @@ app.delete("/supprimerpro/:id", function (req, res) {
 
 
 
+
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // INSCRIPTION PAR
@@ -315,7 +283,7 @@ app.post("/api/inscriptionpar", function (req, res) {
     Data.save()
         .then(() => {
             console.log("User particulier saved");
-            res.redirect("/")
+            res.redirect(`http://localhost:3000/affichertissu/`)
 
         })
         .catch(err => { console.log(err); })
@@ -325,27 +293,10 @@ app.get("/inscriptionpar", function (req, res) {
     res.render("InscriptionPar");
 })
 
-// app.get("/affichertissu", function (req,res){
-//     res.render("AfficherTissu");
-// })
-
-// app.get("/connexion", function (req,res){
-//     res.render("Connexion");
-// })
-
-
-// RECUPERATION UTILISATEUR PAR
-app.get("/utilisateurPar", function (req, res) {
-    UtilisateurPar.find()
-        .then((data) => {
-            res.json(data);
-        })
-})
-
 
 //CONNEXION 
 
-app.post("/connexion", function (req, res) {
+app.post("/connexionpar", function (req, res) {
     UtilisateurPar.findOne({
         email: req.body.email
     }).then(utilisateurPar => {
@@ -355,12 +306,14 @@ app.post("/connexion", function (req, res) {
         if (!bcrypt.compareSync(req.body.password, utilisateurPar.password)) {
             return res.status(404).send("Invalid password")
         }
-        //JWT à ce niveau la, mettre tout en public puis sécuriser à la fin
-
-        // req.session.user = utilisateurPro;
-        console.log("Connected");
-        // res.json('LOGGED IN')
-        res.redirect(`/recupdataform/${utilisateurPar._id}`);
+        const accessToken = createTokens(utilisateurPar)
+        
+        res.cookie("access-token", accessToken, {
+            maxAge: 1000 * 60 * 60 * 24 * 5, // 5 jours en ms
+            httpOnly: true
+        } )
+        console.log("PAR Connected");
+        res.redirect(`http://localhost:3000/recupdataformpar/${utilisateurPar._id}`);
     })
         .catch(err => {
             console.log(err);
@@ -368,14 +321,35 @@ app.post("/connexion", function (req, res) {
         })
 });
 
-app.get("/recupdataform", function (req, res) {
-    res.render('recupdataform');
+
+// RECUPERATION UTILISATEUR PAR
+app.get("/utilisateurPar" ,validateToken, function (req, res) {
+    UtilisateurPar.find()
+        .then((data) => {
+            res.json(data);
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ error: 'ERROR' });
+        });
+})
+
+app.get("/recupdataformpar", function (req, res) {
+    res.render('http://localhost:3000/recupdataformpar/');
+});
+
+app.get("/recupdataformpar/:id", function (req, res) {
+    UtilisateurPar.findOne({ _id: req.params.id })
+        .then((data) => {
+            res.json(data)
+        })
+        .catch(err => { console.log(err); });
 });
 
 
 //MODIFIER COMPTE
 
-app.put("//:id", function (req, res) {
+app.put("/recupdataformpar/:id", function (req, res) {
     const Data = {
         nom: req.body.nom,
         prenom: req.body.prenom,
@@ -387,7 +361,7 @@ app.put("//:id", function (req, res) {
     UtilisateurPar.updateOne({ _id: req.params.id }, { $set: Data })
         .then(() => {
             console.log("Account updated");
-            res.redirect("//" + req.params.id); // avant c'était profil
+            res.redirect(`http://localhost:3000/recupdataformpar/${req.params.id}`); // avant c'était profil
         })
         .catch(err => { console.log(err); });
 });
@@ -414,16 +388,15 @@ app.put("//:id", function (req, res) {
 
 //DECONNEXION 
 
-// app.get('/deconnexion', (req, res) => {
-//     req.session.destroy((err) => {
-//         if (err) {
-//             console.log(err);
-//         } else {
-//             console.log("Deconnected")
-//             res.redirect('/connexion');
-//         }
-//     });
-// });
+app.get('/deconnexion', (req, res) =>{
+    res.clearCookie("access-token");
+    res.redirect('http://localhost:3000/connexion/');
+    console.log("Déconnecté");
+})
+
+app.get('/getJwt', validateToken, (req, res) =>{
+    res.json(jwtDecode(req.cookies["access-token"]))
+});
 
 //SUPPRIMER COMPTE
 
@@ -431,7 +404,6 @@ app.delete("/supprimer/:id", function (req, res) {
     UtilisateurPar.findOneAndDelete({ _id: req.params.id })
         .then(() => {
             console.log("Account deleted");
-            req.session.user = UtilisateurPar;
             res.redirect("http://localhost:3000/");
         })
         .catch((err) => { console.log(err); })
@@ -439,12 +411,15 @@ app.delete("/supprimer/:id", function (req, res) {
 
 
 
+//////////////////////////////////////////////////////////////////////////////////
+
 //TISSU
 
 var Tissu = require('./models/Tissu');
 //formulaire nouveau produit
 app.get('/newproduit', function (req, res) {
-    res.render('NewProduit')
+    // res.redirect('http://localhost:3000/newproduit')
+    res.render("NewProduit")
 });
 
 //ajout du produit (tissu)
@@ -461,7 +436,7 @@ app.post('/newproduit', upload.single('image'), function (req, res) {
 
     // Image obligatoire pour l'enregistrement d'un blog
     if (!req.file) {
-        res.status(400).json("No File Uploaded")
+        res.status(400).json("Y'a aucune photo chef")
         //si erreur d'ajout d'image
     }
     else {
