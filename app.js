@@ -121,11 +121,9 @@ app.use(hpp());
 
 const helmet = require("helmet");
 
-
 app.get("/", function (req, res) {
     res.render("/");
 })
-
 
 
 
@@ -134,6 +132,7 @@ app.get("/", function (req, res) {
 var UtilisateurPro = require("./models/UtilisateurPro")
 
 app.post("/api/inscriptionpro", function (req, res) {
+    const estVendeur = req.body.vendeur === 'on' ? true : false; //ternaire
     const Data = new UtilisateurPro({
         nom: req.body.nom,
         prenom: req.body.prenom,
@@ -143,6 +142,7 @@ app.post("/api/inscriptionpro", function (req, res) {
         siretTva: req.body.siretTva,
         adresse: req.body.adresse,
         url: req.body.url,
+        vendeur: estVendeur,
         password: bcrypt.hashSync(req.body.password, 10),
     })
     Data.save()
@@ -160,7 +160,7 @@ app.get("/inscriptionpro", function (req, res) {
 
 //CONNEXION 
 
-app.post("/connexion", function (req, res) {
+app.post("/connexionpro", function (req, res) {
     UtilisateurPro.findOne({
         email: req.body.email
     }).then(utilisateurPro => {
@@ -176,9 +176,13 @@ app.post("/connexion", function (req, res) {
             maxAge: 1000 * 60 * 60 * 24 * 5, // 5 jours en ms
             httpOnly: true
         } )
-        console.log("PRO Connected");
-        res.redirect(`http://localhost:3000/recupdataform/${utilisateurPro._id}`)
-        // res.json({ user: utilisateurPro });
+        if (utilisateurPro.vendeur) {
+            console.log("Vendeur connecté");
+            res.redirect(`http://localhost:3000/recupdataform/${utilisateurPro._id}`);
+        } else {
+            console.log("Utilisateur PRO connecté");
+            res.redirect(`http://localhost:3000/recupdataform/${utilisateurPro._id}`);
+        }
     })
         .catch(err => {
             console.log(err);
@@ -188,7 +192,7 @@ app.post("/connexion", function (req, res) {
 
 
 // RECUPERATION UTILISATEUR PRO
-app.get("/utilisateur/:id", validateToken, function (req, res) {
+app.get("/utilisateurpro/:id", validateToken, function (req, res) {
     UtilisateurPro.find({ _id: req.params.id })
         .then((data) => {
             res.json(data);
@@ -222,7 +226,8 @@ app.put("/recupdataform/:id", function (req, res) {
         prenom: req.body.prenom,
         email: req.body.email,
         tel: req.body.tel,
-        siret: req.body.siret,
+        societe: req.body.societe,
+        siretTva: req.body.siretTva,
         adresse: req.body.adresse,
         url: req.body.url,
         password: bcrypt.hashSync(req.body.password, 10)
@@ -264,7 +269,6 @@ app.delete("/supprimerpro/:id", function (req, res) {
 
 
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // INSCRIPTION PAR
@@ -283,8 +287,7 @@ app.post("/api/inscriptionpar", function (req, res) {
     Data.save()
         .then(() => {
             console.log("User particulier saved");
-            res.redirect(`http://localhost:3000/affichertissu/`)
-
+            res.redirect(`http://localhost:3000/connexion/`)
         })
         .catch(err => { console.log(err); })
 })
@@ -293,10 +296,8 @@ app.get("/inscriptionpar", function (req, res) {
     res.render("InscriptionPar");
 })
 
-
-//CONNEXION 
-
-app.post("/connexionpar", function (req, res) {
+// CONNEXION PAR
+app.post("/connexion", function (req, res) {
     UtilisateurPar.findOne({
         email: req.body.email
     }).then(utilisateurPar => {
@@ -319,12 +320,11 @@ app.post("/connexionpar", function (req, res) {
             console.log(err);
             res.status(500).send("Erreur");
         })
-});
-
+})
 
 // RECUPERATION UTILISATEUR PAR
-app.get("/utilisateurPar" ,validateToken, function (req, res) {
-    UtilisateurPar.find()
+app.get("/utilisateurpar/:id", validateToken, function (req, res) {
+    UtilisateurPar.findOne({ _id: req.params.id })
         .then((data) => {
             res.json(data);
         })
@@ -335,8 +335,8 @@ app.get("/utilisateurPar" ,validateToken, function (req, res) {
 })
 
 app.get("/recupdataformpar", function (req, res) {
-    res.render('http://localhost:3000/recupdataformpar/');
-});
+    res.redirect('http://localhost:3000/recupdataformpar/');
+})
 
 app.get("/recupdataformpar/:id", function (req, res) {
     UtilisateurPar.findOne({ _id: req.params.id })
@@ -347,8 +347,7 @@ app.get("/recupdataformpar/:id", function (req, res) {
 });
 
 
-//MODIFIER COMPTE
-
+// MODIFIER COMPTE PAR
 app.put("/recupdataformpar/:id", function (req, res) {
     const Data = {
         nom: req.body.nom,
@@ -361,34 +360,12 @@ app.put("/recupdataformpar/:id", function (req, res) {
     UtilisateurPar.updateOne({ _id: req.params.id }, { $set: Data })
         .then(() => {
             console.log("Account updated");
-            res.redirect(`http://localhost:3000/recupdataformpar/${req.params.id}`); // avant c'était profil
+            res.redirect(`http://localhost:3000/recupdataformpar/${req.params.id}`);
         })
         .catch(err => { console.log(err); });
 });
 
-// app.get("/recupdataform/:id", function (req,res){
-//     UtilisateurPar.findOne({_id : req.params.id})
-//     .then((data)=>{
-//         res.json(data)
-//         // res.redirect("RecupDataForm",{data : data})
-//     .catch(err =>{console.log(err);})
-// })
-// });
-
-// app.get("/recupdataform/:id", function (req,res){
-//     UtilisateurPar.findOne({
-//         _id : req.params.id
-//     })
-//     .then((data)=>{
-//         res.render("AfficherTissu", {data: data});
-//     })
-//     .catch(err => console.log(err));
-// })
-
-
-//DECONNEXION 
-
-app.get('/deconnexion', (req, res) =>{
+app.get('/deconnexionpar', (req, res) =>{
     res.clearCookie("access-token");
     res.redirect('http://localhost:3000/connexion/');
     console.log("Déconnecté");
@@ -398,9 +375,8 @@ app.get('/getJwt', validateToken, (req, res) =>{
     res.json(jwtDecode(req.cookies["access-token"]))
 });
 
-//SUPPRIMER COMPTE
-
-app.delete("/supprimer/:id", function (req, res) {
+// SUPPRIMER COMPTE PAR
+app.delete("/supprimerpar/:id", function (req, res) {
     UtilisateurPar.findOneAndDelete({ _id: req.params.id })
         .then(() => {
             console.log("Account deleted");
@@ -410,27 +386,27 @@ app.delete("/supprimer/:id", function (req, res) {
 });
 
 
-
 //////////////////////////////////////////////////////////////////////////////////
 
 //TISSU
 
 var Tissu = require('./models/Tissu');
+
 //formulaire nouveau produit
-app.get('/newproduit', function (req, res) {
-    // res.redirect('http://localhost:3000/newproduit')
-    res.render("NewProduit")
-});
+// app.get('/newproduit', function (req, res) {
+//     // res.redirect('http://localhost:3000/newproduit')
+//     res.render("NewProduit")
+// });
 
 //ajout du produit (tissu)
 app.post('/newproduit', upload.single('image'), function (req, res) {
     // avec les données reçues dans la requête on crée un nouveau produit/tissu
     const Data = new Tissu({
-        image: req.body.image,
+        image: req.file.filename,
         titre: req.body.titre,
         couleur: req.body.couleur,
         description: req.body.description,
-        prix: req.body.prix,
+        // prix: req.body.prix,
     })
     console.log(req.file);
 
@@ -443,8 +419,8 @@ app.post('/newproduit', upload.single('image'), function (req, res) {
         Data.save()
             .then(() => {
                 console.log("Fabric saved");
-                // res.status(201).json({"result" : "Fabric saved"})
-                res.redirect('http://localhost:3000/affichertissu')
+                res.status(201).json({"result" : "Fabric saved"})
+                // res.redirect('http://localhost:3000/affichertissu')
             })
             .catch(err => console.error(err));
     }
@@ -463,11 +439,11 @@ app.get('/affichertissu', function (req, res) {
 // MODIFIER TISSU
 app.put('/modiftissu/:id', function (req, res) {
     const Data = {
-        image: image,
+        image: req.body.image,
         titre: req.body.titre,
         couleur: req.body.couleur,
         description: req.body.description,
-        prix: req.body.prix,
+        // prix: req.body.prix,
     }
     Tissu.updateOne({
         _id: req.params.id

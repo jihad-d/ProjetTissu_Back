@@ -8,8 +8,8 @@ const utilisateurProSchema = mongoose.Schema({
     siretTva : { type : "number", required: true},
     adresse : { type: "string"},
     url : { type: "string"},
+    vendeur: { type: Boolean, default: true },
     password : {type: 'string', required: true},
-
 })
 
 module.exports = mongoose.model("Users", utilisateurProSchema);
